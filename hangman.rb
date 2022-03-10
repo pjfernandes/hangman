@@ -9,13 +9,22 @@ class Hangman
     puts "HANGMAN GAME STARTED!"
     @word = @@words.select{ |word| word.size.between?(5,12) }.sample.upcase
     @word_chars = @word.split("")
+    print "Continue a previous game? (Y/N) > "
+    @continue = gets.chomp.upcase
     @guesses = []
     @errors = 0
+    @pause = "N"
 
-    until @errors == 15
+    continue_game if @continue == "Y" && File.exists?("guesses.txt")
+
+    until @errors == rounds && @pause == "Y"
       player_try
       puts display
+      print "Do you want to pause the game? (Y/N) > "
+      @pause = gets.chomp.to_s
     end
+
+    pause_game if @pause == "Y"
 
     if !display.include?("_ ")
       puts "YOU WIN!"
@@ -26,6 +35,26 @@ class Hangman
   end
 
   private
+  def pause_game
+    file_guesses = open("guesses.txt", "w")
+    file_errors = open("errors.txt", "w")
+    @guesses.each do |guess|
+      file_guesses.write(guess)
+    end
+    file_errors.write(@errors)
+    file_guesses.close
+    file_errors.close
+  end
+
+  def continue_game
+    file_guesses = open("guesses.txt", "r").readlines
+    file_errors = open("errors.txt", "r").read.to_i
+    @errors = file_errors
+    file_guesses.each do |guess|
+      @guesses << guess
+    end
+  end
+
   def display
     word_display = ""
     @word_chars.each do |char|
