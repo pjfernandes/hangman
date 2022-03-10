@@ -22,6 +22,7 @@ class Hangman
       puts display
       print "Do you want to pause the game? (Y/N) > "
       @pause = gets.chomp.to_s
+      break if @pause == "Y"
     end
 
     pause_game if @pause == "Y"
@@ -36,20 +37,35 @@ class Hangman
 
   private
   def pause_game
-    file_guesses = open("guesses.txt", "w")
+
     file_errors = open("errors.txt", "w")
+    file_errors.write(@errors)
+    file_errors.close
+
+    file_guesses = open("guesses.txt", "w")
     @guesses.each do |guess|
       file_guesses.write(guess)
     end
-    file_errors.write(@errors)
     file_guesses.close
-    file_errors.close
+
+    word_chars_save = open("word_chars.txt", "w")
+      @word_chars.each do |char|
+      word_chars_save.write(char)
+    end
+    word_chars_save.close
+
   end
 
   def continue_game
-    file_guesses = open("guesses.txt", "r").readlines
+
     file_errors = open("errors.txt", "r").read.to_i
     @errors = file_errors
+
+    file_chars = open("word_chars.txt", "r").read
+    @word = file_chars.upcase
+    @word_chars = @word.split("")
+
+    file_guesses = open("guesses.txt", "r").read.split("")
     file_guesses.each do |guess|
       @guesses << guess
     end
